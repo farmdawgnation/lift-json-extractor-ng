@@ -10,3 +10,5 @@ libraryDependencies := Seq(
   "net.liftweb"    %% "lift-json"     % "3.1.0-M1",
   "org.scala-lang" %  "scala-reflect" % "2.12.1"
 )
+
+scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation")

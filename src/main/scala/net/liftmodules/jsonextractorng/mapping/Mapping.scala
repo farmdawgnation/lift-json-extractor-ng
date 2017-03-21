@@ -33,7 +33,7 @@ case class Value(targetType: Type) extends IndependentMapping
  * A dictionary mapping translates into a Map[_, _], and will be used when the calling code
  * asks for something fitting that shape.
  */
-case class Dictionary(mapping: IndependentMapping) extends IndependentMapping
+case class Dictionary(keyMapping: IndependentMapping, valueMapping: IndependentMapping) extends IndependentMapping
 
 /**
  * A collection mapping is used when any of the standard collection types are called for by the
@@ -76,7 +76,7 @@ case class Constructor(targetType: Type, choices: Seq[DeclaredConstructor]) exte
 /**
  * A declared constructor on the type that we would like to instantiate.
  */
-case class DeclaredConstructor(constructor: MethodMirror, args: List[Argument])
+case class DeclaredConstructor(constructor: MethodSymbol, args: List[Argument])
 
 /**
  * An argument for the declared constructor and the mapping for how to extract that argument.
