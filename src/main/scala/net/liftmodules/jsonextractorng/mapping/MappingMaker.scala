@@ -12,11 +12,11 @@ object MappingMaker {
   private val listTypeConstructor = typeOf[List[_]].typeConstructor
   private val setTypeConstructor = typeOf[Set[_]].typeConstructor
   private val arrayTypeConstructor = typeOf[Array[_]].typeConstructor
-  private val collectionTypeConstructors = Set(optionTypeConstructor, listTypeConstructor, setTypeConstructor, arrayTypeConstructor)
+  private[mapping] val collectionTypeConstructors = Set(optionTypeConstructor, listTypeConstructor, setTypeConstructor, arrayTypeConstructor)
 
-  private val mapTypeConstructor = typeOf[Map[_, _]].typeConstructor
+  private[mapping] val mapTypeConstructor = typeOf[Map[_, _]].typeConstructor
 
-  private val primitiveTypes = Set(
+  private[mapping] val primitiveTypes: Set[Type] = Set(
     typeOf[String],
     typeOf[Int],
     typeOf[Long],
@@ -31,10 +31,10 @@ object MappingMaker {
   def makeMapping(targetType: Type): IndependentMapping = {
     targetType match {
       case colType if collectionTypeConstructors.contains(colType.typeConstructor) =>
-        Collection(colType, makeMapping(colType.typeParams(0).info))
+        Collection(colType.typeConstructor, makeMapping(colType.typeArgs(0)))
 
       case dictType if dictType.typeConstructor == mapTypeConstructor =>
-        Dictionary(makeMapping(dictType.typeParams(0).info), makeMapping(dictType.typeParams(1).info))
+        Dictionary(makeMapping(dictType.typeArgs(0)), makeMapping(dictType.typeArgs(1)))
 
       case primType if primitiveTypes.contains(primType) =>
         Value(primType)

@@ -8,7 +8,8 @@ scalaVersion := "2.12.1"
 
 libraryDependencies := Seq(
   "net.liftweb"    %% "lift-json"     % "3.1.0-M1",
-  "org.scala-lang" %  "scala-reflect" % "2.12.1"
+  "org.scala-lang" %  "scala-reflect" % "2.12.1",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
 
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation")
