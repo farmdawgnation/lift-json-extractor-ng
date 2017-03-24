@@ -76,7 +76,7 @@ case class Constructor(targetType: Type, choices: Seq[DeclaredConstructor]) exte
 /**
  * A declared constructor on the type that we would like to instantiate.
  */
-case class DeclaredConstructor(constructor: MethodSymbol, args: List[Argument])
+case class DeclaredConstructor(constructor: MethodMirror, args: List[Argument])
 
 /**
  * An argument for the declared constructor and the mapping for how to extract that argument.

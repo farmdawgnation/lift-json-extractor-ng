@@ -56,12 +56,7 @@ object Extraction {
                     executeMapping(fieldValue, argData.mapping)
                   }
 
-                  val m = runtimeMirror(getClass.getClassLoader)
-                  val targetClass = targetType.typeSymbol.asClass
-                  val classMirror = m.reflectClass(targetClass)
-                  val invokable = classMirror.reflectConstructor(reflectCtor)
-
-                  invokable.apply(nativeArgs: _*)
+                  reflectCtor.apply(nativeArgs: _*)
 
                 case None =>
                   throw new Exception(s"No suitable constructor found")

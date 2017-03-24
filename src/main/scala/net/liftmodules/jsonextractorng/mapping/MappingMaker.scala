@@ -9,7 +9,7 @@ import ru._
  */
 object MappingMaker {
   import Constants._
-  
+
   def makeMapping(targetType: Type): IndependentMapping = {
     targetType match {
       case colType if collectionTypeConstructors.exists(_ =:= colType.typeConstructor) =>
@@ -35,7 +35,12 @@ object MappingMaker {
           if (ctor.paramLists.length > 1) {
             throw new RuntimeException("All constructors on requested type must have a single parameter list.")
           } else if (ctor.paramLists.length == 0) {
-            DeclaredConstructor(ctor, Nil)
+            val m = runtimeMirror(getClass.getClassLoader)
+            val targetClass = constructableType.typeSymbol.asClass
+            val classMirror = m.reflectClass(targetClass)
+            val invokable = classMirror.reflectConstructor(ctor)
+
+            DeclaredConstructor(invokable, Nil)
           } else {
             val arguments = ctor.paramLists(0).map { param =>
               val paramType = param.asTerm.info
@@ -47,7 +52,12 @@ object MappingMaker {
               }
             }
 
-            DeclaredConstructor(ctor, arguments)
+            val m = runtimeMirror(getClass.getClassLoader)
+            val targetClass = constructableType.typeSymbol.asClass
+            val classMirror = m.reflectClass(targetClass)
+            val invokable = classMirror.reflectConstructor(ctor)
+
+            DeclaredConstructor(invokable, arguments)
           }
         }
 
