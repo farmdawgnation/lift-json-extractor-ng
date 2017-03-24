@@ -5,7 +5,8 @@ import net.liftmodules.jsonextractorng.mapping.Constants._
 import net.liftweb.json._
 import scala.reflect.api._
 import scala.reflect.runtime.{universe=>ru}
-import ru._
+import ru.{Try => _, _}
+import scala.util._
 
 object Extraction {
   implicit class ExtractionNg(underlyingJValue: JValue) {
@@ -17,7 +18,7 @@ object Extraction {
     private[this] def executeMapping(root: JValue, mapping: Mapping): Any = {
       mapping match {
         case Value(targetType) =>
-          convertValueToNative(root, mapping)
+          convertValueToNative(root, targetType)
 
         case Dictionary(keyMapping, valueMapping) =>
           ???
@@ -29,15 +30,51 @@ object Extraction {
           ???
 
         case Argument(path, mapping, optional) =>
-          ???
+          if (root == JNothing && optional) {
+            None
+          } else {
+            val attempt = Try(executeMapping(root, mapping))
 
-        case Constructor(targetType, declaredConstructors) =>
-          ???
+            attempt match {
+              case Failure(_) if optional => None
+              case Failure(ex) => throw ex
+              case Success(null) if optional => None
+              case Success(somethingElse) if optional => Some(somethingElse)
+              case Success(anything) => anything
+            }
+          }
+
+        case ctor @ Constructor(targetType, declaredConstructors) =>
+          root match {
+            case obj @ JObject(fields) =>
+              val argNames = fields.map(_.name)
+
+              ctor.bestMatching(argNames) match {
+                case Some(DeclaredConstructor(reflectCtor, args)) =>
+                  val nativeArgs = args.map { argData =>
+                    val fieldValue = obj.findField(_.name == argData.path).map(_.value).getOrElse(JNothing)
+                    executeMapping(fieldValue, argData.mapping)
+                  }
+
+                  val m = runtimeMirror(getClass.getClassLoader)
+                  val targetClass = targetType.typeSymbol.asClass
+                  val classMirror = m.reflectClass(targetClass)
+                  val invokable = classMirror.reflectConstructor(reflectCtor)
+
+                  invokable.apply(nativeArgs: _*)
+
+                case None =>
+                  throw new Exception(s"No suitable constructor found")
+              }
+
+            case otherJvalue =>
+              throw new Exception(s"Was expecting to see a JObject when building a $targetType")
+          }
       }
     }
 
-    private[this] def convertValueToNative(root: JValue, mapping: Mapping): Any = {
-      (root, mapping) match {
+    private[this] def convertValueToNative(root: JValue, targetType: Type): Any = {
+      (root, targetType) match {
         case (JString(innerString), `stringType`) =>
           innerString
 
@@ -62,8 +99,14 @@ object Extraction {
         case (JInt(innerBigInt), `shortType`) =>
           innerBigInt.shortValue
 
+        case (JBool(innerBoolean), `booleanType`) =>
+          innerBoolean
+
+        case (JNull | JNothing, _) =>
+          null
+
         case _ =>
-          throw new Exception(s"Could not find match for $mapping")
+          throw new Exception(s"Could not find match for $root to $targetType")
       }
     }
   }

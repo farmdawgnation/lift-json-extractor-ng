@@ -5,8 +5,9 @@ import scala.reflect.runtime.{universe=>ru}
 import ru._
 
 class MappingMakerSpec extends FlatSpec with Matchers {
+  import Constants._
   "MappingMaker" should "correctly identify primitives" in {
-    MappingMaker.primitiveTypes.map { primType =>
+    primitiveTypes.map { primType =>
       MappingMaker.makeMapping(primType) should equal(Value(primType))
     }
   }
