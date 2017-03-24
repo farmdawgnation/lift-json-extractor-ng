@@ -8,26 +8,8 @@ import ru._
  * Generates mappings for specific types.
  */
 object MappingMaker {
-  private val optionTypeConstructor = typeOf[Option[_]].typeConstructor
-  private val listTypeConstructor = typeOf[List[_]].typeConstructor
-  private val setTypeConstructor = typeOf[Set[_]].typeConstructor
-  private val arrayTypeConstructor = typeOf[Array[_]].typeConstructor
-  private[mapping] val collectionTypeConstructors = Set(optionTypeConstructor, listTypeConstructor, setTypeConstructor, arrayTypeConstructor)
-
-  private[mapping] val mapTypeConstructor = typeOf[Map[_, _]].typeConstructor
-
-  private[mapping] val primitiveTypes: Set[Type] = Set(
-    typeOf[String],
-    typeOf[Int],
-    typeOf[Long],
-    typeOf[Double],
-    typeOf[Float],
-    typeOf[Byte],
-    typeOf[BigInt],
-    typeOf[Boolean],
-    typeOf[Short]
-  )
-
+  import Constants._
+  
   def makeMapping(targetType: Type): IndependentMapping = {
     targetType match {
       case colType if collectionTypeConstructors.exists(_ =:= colType.typeConstructor) =>
