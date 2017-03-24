@@ -36,7 +36,25 @@ class MappingMakerSpec extends FlatSpec with Matchers {
 
     suts.map {
       case (baseType, typeConstructor, keyType, valueType) =>
-        Dictionary(Value(keyType), Value(valueType))
+        MappingMaker.makeMapping(baseType) should equal(Dictionary(Value(keyType), Value(valueType)))
     }
   }
+
+  it should "correctly identify objects" in {
+    MappingMaker.makeMapping(typeOf[ExampleClazz]) should equal(Constructor(
+      typeOf[ExampleClazz],
+      List(
+        DeclaredConstructor(
+          typeOf[ExampleClazz].decl(ru.termNames.CONSTRUCTOR).asTerm.alternatives.map(_.asMethod).toList(0),
+          List(
+            Argument("name", Value(typeOf[String]), false),
+            Argument("favoriteColorIsBlue", Value(typeOf[Boolean]), false),
+            Argument("bonusData", Collection(typeOf[Option[_]].typeConstructor, Value(typeOf[String])), true)
+          )
+        )
+      )
+    ))
+  }
 }
+
+case class ExampleClazz(name: String, favoriteColorIsBlue: Boolean, bonusData: Option[String])

@@ -30,14 +30,21 @@ object MappingMaker {
 
   def makeMapping(targetType: Type): IndependentMapping = {
     targetType match {
-      case colType if collectionTypeConstructors.contains(colType.typeConstructor) =>
-        Collection(colType.typeConstructor, makeMapping(colType.typeArgs(0)))
+      case colType if collectionTypeConstructors.exists(_ =:= colType.typeConstructor) =>
+        Collection(
+          colType.typeConstructor,
+          makeMapping(colType.typeArgs(0))
+        )
 
-      case dictType if dictType.typeConstructor == mapTypeConstructor =>
+      case dictType if dictType.typeConstructor =:= mapTypeConstructor =>
         Dictionary(makeMapping(dictType.typeArgs(0)), makeMapping(dictType.typeArgs(1)))
 
-      case primType if primitiveTypes.contains(primType) =>
-        Value(primType)
+      case primType if primitiveTypes.exists(_ =:= primType) =>
+        // .get is safe below due to the exists check above.
+        // This is real weird but the Scala reflection stuff has its own equivalence
+        // checker. Sometimes == works, and other times it doesn't. Doing this ensures
+        // == will work in extraction bits.
+        Value(primitiveTypes.find(_ =:= primType).get)
 
       case constructableType =>
         val constructorSymbols = targetType.decl(ru.termNames.CONSTRUCTOR).asTerm.alternatives.map(_.asMethod)
@@ -52,7 +59,7 @@ object MappingMaker {
               val paramType = param.asTerm.info
 
               if (collectionTypeConstructors.contains(paramType.typeConstructor)) {
-                Argument(param.asTerm.name.toString, makeMapping(paramType.typeParams(0).info), true)
+                Argument(param.asTerm.name.toString, makeMapping(paramType), true)
               } else {
                 Argument(param.asTerm.name.toString, makeMapping(paramType), false)
               }
