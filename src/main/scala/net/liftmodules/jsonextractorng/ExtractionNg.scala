@@ -11,13 +11,13 @@ object Extraction {
   implicit class ExtractionNg(underlyingJValue: JValue) {
     def extractNg[RequestedType](implicit targetTypeTag: ru.TypeTag[RequestedType]): RequestedType = {
       val mapping = MappingMaker.makeMapping(targetTypeTag.tpe)
-      executeMapping[RequestedType](underlyingJValue, mapping)
+      executeMapping(underlyingJValue, mapping).asInstanceOf[RequestedType]
     }
 
-    private[this] def executeMapping[RT](root: JValue, mapping: Mapping): RT = {
+    private[this] def executeMapping(root: JValue, mapping: Mapping): Any = {
       mapping match {
         case Value(targetType) =>
-          convertValueToNative(root, mapping).asInstanceOf[RT]
+          convertValueToNative(root, mapping)
 
         case Dictionary(keyMapping, valueMapping) =>
           ???
