@@ -35,7 +35,21 @@ object Extraction {
           }
 
         case Collection(targetType, contentsMapping) =>
-          ???
+          root match {
+            case obj @ JArray(contents) =>
+              val extractedContents = contents.map(executeMapping(_, contentsMapping))
+
+              convertCollectionToNative(extractedContents, targetType)
+
+            case otherJValue if targetType != optionTypeConstructor =>
+              throw new Exception("Was expecting to see a JArray when building a collection type")
+
+            case otherJValue =>
+              val extracted = executeMapping(otherJValue, contentsMapping)
+              val filteredExtracted = List(extracted).filterNot(_ == null)
+
+              convertCollectionToNative(filteredExtracted, targetType)
+          }
 
         case HeteroCollection(targetType, mappings) =>
           ???
@@ -113,6 +127,22 @@ object Extraction {
 
         case _ =>
           throw new Exception(s"Could not find match for $root to $targetType")
+      }
+    }
+
+    private[this] def convertCollectionToNative(contents: List[Any], targetType: Type): Any = {
+      targetType match {
+        case `listTypeConstructor` =>
+          contents
+
+        case `setTypeConstructor` =>
+          contents.toSet
+
+        case `arrayTypeConstructor` =>
+          contents.toArray
+
+        case `optionTypeConstructor` =>
+          contents.headOption
       }
     }
   }

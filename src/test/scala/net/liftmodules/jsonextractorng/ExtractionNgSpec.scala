@@ -26,6 +26,51 @@ class ExtractionNgSpec extends FlatSpec with Matchers {
 
     input.extractNg[Map[String, String]] should equal(Map("name" -> "Burt", "occupation" -> "Software Engineer"))
   }
+
+  it should "correctly extract a list from a JArray" in {
+    val input: JArray = JArray(List(JString("thing one"), JString("thing two"), JString("thing three")))
+    val expectedOutput = List("thing one", "thing two", "thing three")
+
+    val output = input.extractNg[List[String]]
+
+    output should equal(expectedOutput)
+  }
+
+  ignore should "correctly extract an array from a JArray" in {
+    val input: JArray = JArray(List(JString("thing one"), JString("thing two"), JString("thing three")))
+    val expectedOutput = Array("thing one", "thing two", "thing three")
+
+    val output = input.extractNg[Array[String]]
+
+    output should equal(expectedOutput)
+  }
+
+  it should "correctly extract a set from a JArray" in {
+    val input: JArray = JArray(List(JString("thing one"), JString("thing two"), JString("thing one")))
+    val expectedOutput = Set("thing one", "thing two")
+
+    val output = input.extractNg[Set[String]]
+
+    output should equal(expectedOutput)
+  }
+
+  it should "correctly handle Option presence" in {
+    val input: JString = JString("bacon")
+    val expectedOutput = Some("bacon")
+
+    val output = input.extractNg[Option[String]]
+
+    output should equal(expectedOutput)
+  }
+
+  it should "correctly handle Option absence" in {
+    val input = JNull
+    val expectedOutput = None
+
+    val output = input.extractNg[Option[String]]
+
+    output should equal(expectedOutput)
+  }
 }
 
 case class SimpleCaseClass(name: String, age: Int)
