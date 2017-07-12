@@ -5,6 +5,8 @@ import scala.reflect.runtime.{universe=>ru}
 import ru._
 
 class MappingMakerSpec extends FlatSpec with Matchers {
+  val testRuntimeMirror = runtimeMirror(getClass.getClassLoader)
+
   import Constants._
   "MappingMaker" should "correctly identify primitives" in {
     primitiveTypes.map { primType =>
@@ -42,11 +44,17 @@ class MappingMakerSpec extends FlatSpec with Matchers {
   }
 
   it should "correctly identify objects" in {
-    MappingMaker.makeMapping(typeOf[ExampleClazz]) should equal(Constructor(
+    val ctorSymbol = typeOf[ExampleClazz].decl(ru.termNames.CONSTRUCTOR).asTerm.alternatives.map(_.asMethod).toList(0)
+    val targetClass = typeOf[ExampleClazz].typeSymbol.asClass
+    val classMirror = testRuntimeMirror.reflectClass(targetClass)
+    val ctor = classMirror.reflectConstructor(ctorSymbol)
+
+    val resultMappingToStr = MappingMaker.makeMapping(typeOf[ExampleClazz]).toString
+    val expectedMappingToStr = Constructor(
       typeOf[ExampleClazz],
       List(
         DeclaredConstructor(
-          typeOf[ExampleClazz].decl(ru.termNames.CONSTRUCTOR).asTerm.alternatives.map(_.asMethod).toList(0),
+          ctor,
           List(
             Argument("name", Value(typeOf[String]), false),
             Argument("favoriteColorIsBlue", Value(typeOf[Boolean]), false),
@@ -54,7 +62,11 @@ class MappingMakerSpec extends FlatSpec with Matchers {
           )
         )
       )
-    ))
+    ).toString
+
+    // This is lame, but it looks like no to reflections of the constructor are equal and
+    // as a result we need to compare the string representation of them.
+    resultMappingToStr should equal(expectedMappingToStr)
   }
 }
 
