@@ -21,7 +21,18 @@ object Extraction {
           convertValueToNative(root, targetType)
 
         case Dictionary(keyMapping, valueMapping) =>
-          ???
+          root match {
+            case obj @ JObject(fields) =>
+              fields.foldLeft(Map[Any, Any]()) { (acc, field) =>
+                val attemptKey = executeMapping(JString(field.name), keyMapping)
+                val attemptValue = executeMapping(field.value, valueMapping)
+
+                acc + (attemptKey -> attemptValue)
+              }
+
+            case otherJValue =>
+              throw new Exception(s"Was expecting to see a JObject when building a Map")
+          }
 
         case Collection(targetType, contentsMapping) =>
           ???

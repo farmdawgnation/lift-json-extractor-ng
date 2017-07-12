@@ -20,6 +20,12 @@ class ExtractionNgSpec extends FlatSpec with Matchers {
 
     input.extractNg[SimpleCaseClass] should equal(SimpleCaseClass("Burt", 40))
   }
+
+  it should "correctly extract a map from an object" in {
+    val input: JObject = ("name" -> "Burt") ~ ("occupation" -> "Software Engineer")
+
+    input.extractNg[Map[String, String]] should equal(Map("name" -> "Burt", "occupation" -> "Software Engineer"))
+  }
 }
 
 case class SimpleCaseClass(name: String, age: Int)
