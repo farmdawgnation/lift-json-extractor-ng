@@ -18,6 +18,14 @@ object MappingMaker {
           makeMapping(colType.typeArgs(0))
         )
 
+      case heteroColType if heteroCollectionTypeConstructors.exists(_ =:= heteroColType.typeConstructor) =>
+        val componentMappings = heteroColType.typeArgs.map(makeMapping)
+
+        HeteroCollection(
+          heteroColType.typeConstructor,
+          componentMappings
+        )
+
       case dictType if dictType.typeConstructor =:= mapTypeConstructor =>
         Dictionary(makeMapping(dictType.typeArgs(0)), makeMapping(dictType.typeArgs(1)))
 

@@ -30,6 +30,17 @@ class MappingMakerSpec extends FlatSpec with Matchers {
     }
   }
 
+  it should "correctly identify hereo collections" in {
+    val tup = typeOf[Tuple2[String, Int]]
+    val mapping = MappingMaker.makeMapping(tup)
+    val expectedMapping = HeteroCollection(
+      tup.typeConstructor,
+      Seq(Value(typeOf[String]), Value(typeOf[Int]))
+    )
+
+    mapping should equal(expectedMapping)
+  }
+
   it should "correctly identifiy dictionaries" in {
     val suts = Seq(
       typeOf[Map[String, String]]
