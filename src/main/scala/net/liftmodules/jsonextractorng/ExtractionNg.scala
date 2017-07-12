@@ -52,7 +52,24 @@ object Extraction {
           }
 
         case HeteroCollection(targetType, mappings) =>
-          ???
+          root match {
+            case JArray(contents) if contents.length > 22 =>
+              throw new Exception("Can't deserialize heterogenous arrays larger than 22 items with tuples")
+
+            case obj @ JArray(contents) =>
+              val extractedContents = contents.zip(mappings).map {
+                case (item, mapping) =>
+                  executeMapping(item, mapping)
+              }
+
+              convertTupleToNative(extractedContents)
+
+            case JNull | JNothing =>
+              null
+
+            case otherJValue =>
+              throw new Exception("Encountered unexpected type while parsing hetero collection")
+          }
 
         case Argument(path, mapping, optional) =>
           if (root == JNothing && optional) {
@@ -143,6 +160,57 @@ object Extraction {
 
         case `optionTypeConstructor` =>
           contents.headOption
+      }
+    }
+
+    private[this] def convertTupleToNative(contents: List[Any]): Any = {
+      contents.length match {
+        case 0 =>
+          null
+        case 1 =>
+          (contents(0))
+        case 2 =>
+          (contents(0), contents(1))
+        case 3 =>
+          (contents(0), contents(1), contents(2))
+        case 4 =>
+          (contents(0), contents(1), contents(2), contents(3))
+        case 5 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4))
+        case 6 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5))
+        case 7 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6))
+        case 8 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7))
+        case 9 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8))
+        case 10 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9))
+        case 11 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10))
+        case 12 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11))
+        case 13 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12))
+        case 14 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13))
+        case 15 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14))
+        case 16 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14), contents(15))
+        case 17 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14), contents(15), contents(16))
+        case 18 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14), contents(15), contents(16), contents(17))
+        case 19 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14), contents(15), contents(16), contents(17), contents(18))
+        case 20 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14), contents(15), contents(16), contents(17), contents(18), contents(19))
+        case 21 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14), contents(15), contents(16), contents(17), contents(18), contents(19), contents(20))
+        case 22 =>
+          (contents(0), contents(1), contents(2), contents(3), contents(4), contents(5), contents(6), contents(7), contents(8), contents(9), contents(10), contents(11), contents(12), contents(13), contents(14), contents(15), contents(16), contents(17), contents(18), contents(19), contents(20), contents(21))
       }
     }
   }

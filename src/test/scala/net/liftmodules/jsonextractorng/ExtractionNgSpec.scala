@@ -71,6 +71,15 @@ class ExtractionNgSpec extends FlatSpec with Matchers {
 
     output should equal(expectedOutput)
   }
+
+  it should "correctly extract a Tuple" in {
+    val input = JArray(List(JString("bacon"), JInt(2)))
+    val expectedOutput = ("bacon", 2)
+
+    val output = input.extractNg[Tuple2[String, Int]]
+
+    output should equal(expectedOutput)
+  }
 }
 
 case class SimpleCaseClass(name: String, age: Int)
