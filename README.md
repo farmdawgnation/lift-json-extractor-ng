@@ -18,3 +18,7 @@ import net.liftmodules.jsonextractorng.Extraction._
 
 myJValue.extractNg[Thing]
 ```
+
+## Known Issues
+
+* Array instances can't currently be extracted.
