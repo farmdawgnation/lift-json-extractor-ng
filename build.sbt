@@ -1,4 +1,4 @@
-name := "json-extractor-ng_3.1"
+name := "json-extractor-ng"
 
 version := "0.1.0"
 
