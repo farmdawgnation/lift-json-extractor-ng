@@ -16,5 +16,5 @@ extraction.
 ```scala
 import net.liftmodules.jsonextractorng.Extraction._
 
-myJValue.extract[Thing]
+myJValue.extractNg[Thing]
 ```
