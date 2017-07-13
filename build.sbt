@@ -32,3 +32,25 @@ publishTo := {
 }
 
 credentials += Credentials(Path.userHome / ".sonatype")
+
+pomExtra := {
+  <url>https://github.com/liftmodules/json-extractor-ng</url>
+  <licenses>
+    <license>
+      <name>Apache 2.0 License</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:liftmodules/json-extractor-ng.git</url>
+    <connection>scm:git:git@github.com:liftmodules/json-extractor-ng.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>liftmodules</id>
+      <name>Lift Team</name>
+      <url>http://www.liftmodules.net</url>
+    </developer>
+  </developers>
+}
