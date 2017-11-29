@@ -6,7 +6,7 @@ Java reflection. Currently, it requires Scala 2.12 and only works against Lift 3
 To use it, add it to your library dependencies like so:
 
 ```scala
-libraryDependencies += "net.liftmodules" %% "json-extractor-ng_3.1" % "0.1.0"
+libraryDependencies += "net.liftmodules" %% "json-extractor-ng_3.1" % "0.2.0"
 ```
 
 Once it's set up, import the `Extraction` implicit conversions and use the
