@@ -21,4 +21,4 @@ myJValue.extractNg[Thing]
 
 ## Known Issues
 
-* Array instances can't currently be extracted.
+None (yet)
