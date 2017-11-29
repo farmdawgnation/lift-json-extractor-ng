@@ -102,7 +102,27 @@ class ExtractionNgSpec extends FlatSpec with Matchers {
 
     output should equal(Baconizer("Testy McTestface", 3.14))
   }
+
+  it should "properly handle a custom deserializer with a param type" in {
+    val customDeserializer = new Serializer[Baconizer2[_]] {
+      val clazz = classOf[Baconizer2[_]]
+      override def serialize(implicit formats: Formats) = ???
+
+      override def deserialize(implicit formats: Formats) = {
+        case (TypeInfo(`clazz`, paramType), json) =>
+          val name = (json \ "name").extractNg[String]
+          Baconizer2[String](name, 3.14)
+      }
+    }
+
+    implicit val formats = DefaultFormats + customDeserializer
+    val input: JObject = ("name" -> "Testy McTestface")
+    val output = input.extractNg[Baconizer2[String]]
+
+    output should equal(Baconizer2[String]("Testy McTestface", 3.14))
+  }
 }
 
 case class SimpleCaseClass(name: String, age: Int)
 case class Baconizer(name: String, pi: Double)
+case class Baconizer2[T](name: String, pi: Double)

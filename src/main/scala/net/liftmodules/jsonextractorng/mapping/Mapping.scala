@@ -1,5 +1,6 @@
 package net.liftmodules.jsonextractorng.mapping
 
+import java.lang.reflect.ParameterizedType
 import net.liftweb.json.TypeInfo
 import scala.reflect.api._
 import scala.reflect.runtime.{universe=>ru}
@@ -73,11 +74,26 @@ case class Constructor(targetType: Type, choices: Seq[DeclaredConstructor]) exte
     }
   }
 
-  val typeInfo = {
-    TypeInfo(
-      Class.forName(targetType.typeSymbol.asClass.fullName),
-      None // FIXME: we should eventually compute the parameterized type here
-    )
+  lazy val typeInfo = {
+    val classSymbol = targetType.typeSymbol.asClass
+    val clazz = Class.forName(classSymbol.fullName)
+
+    val typeParams = targetType.typeParams.map { typeParamSymbol =>
+      Class.forName(typeParamSymbol.fullName)
+    }
+
+    val parameterizedType = if (typeParams.isEmpty) {
+      None
+    } else {
+      Some(new ParameterizedType {
+        override def getTypeName() = "generated"
+        override def getRawType() = clazz
+        override def getOwnerType() = clazz
+        override def getActualTypeArguments() = typeParams.toArray
+      })
+    }
+
+    TypeInfo(clazz, parameterizedType)
   }
 }
 
