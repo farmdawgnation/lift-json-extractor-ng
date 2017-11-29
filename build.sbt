@@ -17,7 +17,7 @@ moduleName := name.value + "_" + liftEdition.value
 
 libraryDependencies := Seq(
   "net.liftweb"    %% "lift-json"     % liftVersion.value,
-  "org.scala-lang" %  "scala-reflect" % "2.12.2",
+  "org.scala-lang" %  "scala-reflect" % "2.12.4",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
 
