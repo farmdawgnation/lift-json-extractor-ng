@@ -39,7 +39,7 @@ class ExtractionNgSpec extends FlatSpec with Matchers {
     output should equal(expectedOutput)
   }
 
-  ignore should "correctly extract an array from a JArray" in {
+  it should "correctly extract an array from a JArray" in {
     val input: JArray = JArray(List(JString("thing one"), JString("thing two"), JString("thing three")))
     val expectedOutput = Array("thing one", "thing two", "thing three")
 

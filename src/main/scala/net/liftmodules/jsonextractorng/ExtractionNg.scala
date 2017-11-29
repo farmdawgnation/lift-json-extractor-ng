@@ -39,7 +39,7 @@ object Extraction {
             case obj @ JArray(contents) =>
               val extractedContents = contents.map(executeMapping(_, contentsMapping))
 
-              convertCollectionToNative(extractedContents, targetType)
+              convertCollectionToNative(extractedContents, targetType, contentsMapping)
 
             case otherJValue if targetType != optionTypeConstructor =>
               throw new Exception("Was expecting to see a JArray when building a collection type")
@@ -48,7 +48,7 @@ object Extraction {
               val extracted = executeMapping(otherJValue, contentsMapping)
               val filteredExtracted = List(extracted).filterNot(_ == null)
 
-              convertCollectionToNative(filteredExtracted, targetType)
+              convertCollectionToNative(filteredExtracted, targetType, contentsMapping)
           }
 
         case HeteroCollection(targetType, mappings) =>
@@ -153,7 +153,7 @@ object Extraction {
       }
     }
 
-    private[this] def convertCollectionToNative(contents: List[Any], targetType: Type): Any = {
+    private[this] def convertCollectionToNative(contents: List[Any], targetType: Type, contentsMapping: IndependentMapping): Any = {
       targetType match {
         case `listTypeConstructor` =>
           contents
@@ -162,7 +162,26 @@ object Extraction {
           contents.toSet
 
         case `arrayTypeConstructor` =>
-          contents.toArray
+          val componentScalaType = contentsMapping match {
+            case Value(targetType) =>
+              targetType
+
+            case Constructor(targetType, _) =>
+              targetType
+
+            case other =>
+              throw new Exception(s"Cannot create native array with this contents mapping: $other")
+          }
+
+          val componentJavaType = Class.forName(componentScalaType.typeSymbol.asClass.fullName)
+          val newArr = java.lang.reflect.Array.newInstance(componentJavaType, contents.length)
+
+          contents.zipWithIndex.collect {
+            case (item, index) =>
+              java.lang.reflect.Array.set(newArr, index, item)
+          }
+
+          newArr
 
         case `optionTypeConstructor` =>
           contents.headOption
