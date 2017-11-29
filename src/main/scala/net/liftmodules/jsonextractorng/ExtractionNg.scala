@@ -10,12 +10,12 @@ import scala.util._
 
 object Extraction {
   implicit class ExtractionNg(underlyingJValue: JValue) {
-    def extractNg[RequestedType](implicit targetTypeTag: ru.TypeTag[RequestedType]): RequestedType = {
+    def extractNg[RequestedType](implicit formats: Formats, targetTypeTag: ru.TypeTag[RequestedType]): RequestedType = {
       val mapping = MappingMaker.makeMapping(targetTypeTag.tpe)
       executeMapping(underlyingJValue, mapping).asInstanceOf[RequestedType]
     }
 
-    private[this] def executeMapping(root: JValue, mapping: Mapping): Any = {
+    private[this] def executeMapping(root: JValue, mapping: Mapping)(implicit formats: Formats): Any = {
       mapping match {
         case Value(targetType) =>
           convertValueToNative(root, targetType)
@@ -87,7 +87,12 @@ object Extraction {
           }
 
         case ctor @ Constructor(targetType, declaredConstructors) =>
+          val customDeserializer = formats.customDeserializer(formats)
+
           root match {
+            case obj @ JObject(_) if customDeserializer.isDefinedAt(ctor.typeInfo, obj) =>
+              customDeserializer(ctor.typeInfo, obj)
+
             case obj @ JObject(fields) =>
               val argNames = fields.map(_.name)
 

@@ -1,5 +1,6 @@
 package net.liftmodules.jsonextractorng.mapping
 
+import net.liftweb.json.TypeInfo
 import scala.reflect.api._
 import scala.reflect.runtime.{universe=>ru}
 import ru._
@@ -70,6 +71,13 @@ case class Constructor(targetType: Type, choices: Seq[DeclaredConstructor]) exte
       }
       Some(best._1)
     }
+  }
+
+  val typeInfo = {
+    TypeInfo(
+      Class.forName(targetType.typeSymbol.asClass.fullName),
+      None // FIXME: we should eventually compute the parameterized type here
+    )
   }
 }
 

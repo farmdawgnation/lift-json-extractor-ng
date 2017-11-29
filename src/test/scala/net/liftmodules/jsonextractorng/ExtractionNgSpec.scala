@@ -1,6 +1,7 @@
 package net.liftmodules.jsonextractorng
 
 import org.scalatest._
+import net.liftweb.json.{Formats, Serializer, DefaultFormats, TypeInfo}
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import scala.reflect.runtime.{universe=>ru}
@@ -8,6 +9,8 @@ import scala.reflect.runtime.{universe=>ru}
 
 class ExtractionNgSpec extends FlatSpec with Matchers {
   import Extraction._
+
+  implicit val formats = DefaultFormats
 
   "ExtractionNg" should "correctly extract native things" in {
     JInt(5).extractNg[Int] should equal(5)
@@ -80,6 +83,26 @@ class ExtractionNgSpec extends FlatSpec with Matchers {
 
     output should equal(expectedOutput)
   }
+
+  it should "properly handle a custom deserializer without a param type" in {
+    val customDeserializer = new Serializer[Baconizer] {
+      val clazz = classOf[Baconizer]
+      override def serialize(implicit formats: Formats) = ???
+
+      override def deserialize(implicit formats: Formats) = {
+        case (TypeInfo(`clazz`, None), json) =>
+          val name = (json \ "name").extractNg[String]
+          Baconizer(name, 3.14)
+      }
+    }
+
+    implicit val formats = DefaultFormats + customDeserializer
+    val input: JObject = ("name" -> "Testy McTestface")
+    val output = input.extractNg[Baconizer]
+
+    output should equal(Baconizer("Testy McTestface", 3.14))
+  }
 }
 
 case class SimpleCaseClass(name: String, age: Int)
+case class Baconizer(name: String, pi: Double)
