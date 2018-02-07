@@ -90,8 +90,8 @@ object Extraction {
           val customDeserializer = formats.customDeserializer(formats)
 
           root match {
-            case obj @ JObject(_) if formats.customSerializers.nonEmpty &&
-                                     customDeserializer.isDefinedAt(ctor.typeInfo, obj) =>
+            case obj if formats.customSerializers.nonEmpty &&
+                        customDeserializer.isDefinedAt(ctor.typeInfo, obj) =>
               customDeserializer(ctor.typeInfo, obj)
 
             case obj @ JObject(fields) =>
