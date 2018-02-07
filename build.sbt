@@ -1,6 +1,6 @@
 name := "json-extractor-ng"
 
-version := "0.3.0-SNAPSHOT"
+version := "0.3.0"
 
 organization := "net.liftmodules"
 
